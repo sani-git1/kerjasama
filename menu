@@ -1,0 +1,132 @@
+import streamlit as st
+
+# --- 1. KONFIGURASI HALAMAN ---
+st.set_page_config(
+    page_title="Sistem Kerjasama",
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
+
+# Judul Utama
+st.title("📝 Form Input Data Kerjasama")
+st.markdown("---")
+
+# --- 2. LOGIKA PILIHAN DROP DOWN (DATABASE SEDERHANA) ---
+
+# Opsi Mitra
+mitra_dn = [
+    "Perguruan Tinggi", "Kementerian/Lembaga", "Pemerintah Daerah",
+    "Badan Usaha", "Dunia Industri", "Organisasi Kemasyarakatan"
+]
+mitra_ln = [
+    "Perguruan Tinggi Luar Negeri", "Pemerintah Negara Asing",
+    "Organisasi Internasional", "Organisasi Internasional Non Pemerintah",
+    "Lembaga Pendidikan Negara Asing"
+]
+
+# Opsi Kegiatan per Bidang
+kegiatan_pendidikan = [
+    "Penyelenggaraan pendidikan, penelitian, dan pengabdian", "Penjaminan mutu internal dan eksternal",
+    "Program kembaran (twinning program)", "Gelar bersama (joint degree)", "Gelar ganda (double degree)",
+    "Non Gelar (microcredential)", "Pengalihan/pemerolehan angka kredit", "Penugasan dosen (detasering)",
+    "Pertukaran dosen/mahasiswa", "Dosen tamu", "Pemanfaatan bersama sumber daya",
+    "Seminar bersama", "Pengembangan SDM", "Beasiswa", "Pengembangan bakat minat", "Bidang lainnya (tuliskan)"
+]
+kegiatan_penelitian = [
+    "Penyelenggaraan pendidikan, penelitian, dan pengabdian", "Riset Kolaboratif", "Dosen tamu",
+    "Pemanfaatan bersama sumber daya", "Penerbitan jurnal ilmiah bersama", "Pengembangan SDM",
+    "Bantuan Penelitian", "Jasa dan royalti HKI", "Bidang lainnya (tuliskan)"
+]
+kegiatan_pengabdian = [
+    "Penyelenggaraan pendidikan, penelitian, dan pengabdian", "KKN/KKL", "Pemagangan (internship)",
+    "Pengembangan SDM", "Penjaminan produk halal", "Pendayagunaan aset", "Penggalangan dana",
+    "Pemberdayaan masyarakat", "Jasa lembaga keuangan", "Bidang lainnya (tuliskan)"
+]
+
+# --- 3. FORM INPUT USER ---
+
+with st.form("form_kerjasama"):
+    
+    # --- Input 1: Jenis Kerjasama ---
+    st.subheader("1. Klasifikasi Kerjasama")
+    jenis_kerjasama = st.radio(
+        "Pilih Jenis Kerjasama:",
+        ("Kerjasama Dalam Negeri", "Kerjasama Luar Negeri"),
+        horizontal=True
+    )
+
+    # --- Input 2: Mitra (Logic) ---
+    st.subheader("2. Mitra Kerjasama")
+    # Menentukan list mana yang dipakai berdasarkan pilihan No.1
+    opsi_mitra = mitra_dn if jenis_kerjasama == "Kerjasama Dalam Negeri" else mitra_ln
+    
+    mitra_dipilih = st.selectbox("Pilih Mitra:", opsi_mitra)
+
+    # --- Input 3: Bentuk Kerjasama ---
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("3. Bentuk")
+        bentuk = st.selectbox("Bentuk Kerjasama:", ["Kerjasama Utama", "Kerjasama Teknis"])
+    
+    # --- Input 4: Bidang Kerjasama ---
+    with col2:
+        st.subheader("4. Bidang")
+        bidang = st.selectbox(
+            "Bidang Kerjasama:",
+            ["Pendidikan dan Pengajaran", "Penelitian dan Publikasi", "Pengabdian Kepada Masyarakat"]
+        )
+
+    # --- Input 5: Jenis Kegiatan (Logic) ---
+    st.subheader("5. Detail Kegiatan")
+    
+    # Menentukan list kegiatan berdasarkan pilihan No.4
+    if bidang == "Pendidikan dan Pengajaran":
+        opsi_kegiatan = kegiatan_pendidikan
+    elif bidang == "Penelitian dan Publikasi":
+        opsi_kegiatan = kegiatan_penelitian
+    else:
+        opsi_kegiatan = kegiatan_pengabdian
+        
+    kegiatan = st.selectbox("Pilih Jenis Kegiatan:", opsi_kegiatan)
+    
+    # Logic Tambahan: Munculkan Text Input jika pilih "Lainnya"
+    detail_lainnya = ""
+    if kegiatan == "Bidang lainnya (tuliskan)":
+        detail_lainnya = st.text_input("✍️ Tuliskan detail kegiatan lainnya:")
+
+    # --- Input 6: Sumber Dana ---
+    st.subheader("6. Sumber Dana")
+    sumber_dana = st.selectbox(
+        "Pilih Sumber Dana:",
+        [
+            "Anggaran Perguruan Tinggi Swasta", "APBN", "APBD", 
+            "Anggaran Badan Layanan Umum", "Anggaran PT Berbadan Hukum",
+            "Anggaran Mitra Kerjasama", "Sumber-sumber lain yang disepakati"
+        ]
+    )
+
+    st.markdown("---")
+    submitted = st.form_submit_button("💾 Simpan Data Kerjasama", type="primary")
+
+# --- 4. TAMPILAN HASIL (OUTPUT) ---
+
+if submitted:
+    # Menggabungkan data jika user memilih 'Lainnya'
+    kegiatan_final = detail_lainnya if kegiatan == "Bidang lainnya (tuliskan)" else kegiatan
+    
+    st.success("✅ Data berhasil disimpan!")
+    
+    # Tampilan seperti kartu/tiket
+    with st.container():
+        st.write("### Ringkasan Input:")
+        c1, c2 = st.columns(2)
+        
+        with c1:
+            st.info(f"**Jenis:** {jenis_kerjasama}")
+            st.info(f"**Mitra:** {mitra_dipilih}")
+            st.info(f"**Bentuk:** {bentuk}")
+        
+        with c2:
+            st.warning(f"**Bidang:** {bidang}")
+            st.warning(f"**Kegiatan:** {kegiatan_final}")
+            st.warning(f"**Dana:** {sumber_dana}")
