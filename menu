@@ -7,13 +7,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Judul Utama
 st.title("📝 Form Input Data Kerjasama")
 st.markdown("---")
 
-# --- 2. LOGIKA PILIHAN DROP DOWN (DATABASE SEDERHANA) ---
-
-# Opsi Mitra
+# --- 2. LOGIKA PILIHAN DROP DOWN (DATABASE) ---
 mitra_dn = [
     "Perguruan Tinggi", "Kementerian/Lembaga", "Pemerintah Daerah",
     "Badan Usaha", "Dunia Industri", "Organisasi Kemasyarakatan"
@@ -24,7 +21,6 @@ mitra_ln = [
     "Lembaga Pendidikan Negara Asing"
 ]
 
-# Opsi Kegiatan per Bidang
 kegiatan_pendidikan = [
     "Penyelenggaraan pendidikan, penelitian, dan pengabdian", "Penjaminan mutu internal dan eksternal",
     "Program kembaran (twinning program)", "Gelar bersama (joint degree)", "Gelar ganda (double degree)",
@@ -43,80 +39,70 @@ kegiatan_pengabdian = [
     "Pemberdayaan masyarakat", "Jasa lembaga keuangan", "Bidang lainnya (tuliskan)"
 ]
 
-# --- 3. FORM INPUT USER ---
+# --- 3. FORM INPUT USER (TANPA st.form AGAR REAKTIF) ---
 
-with st.form("form_kerjasama"):
-    
-    # --- Input 1: Jenis Kerjasama ---
-    st.subheader("1. Klasifikasi Kerjasama")
-    jenis_kerjasama = st.radio(
-        "Pilih Jenis Kerjasama:",
-        ("Kerjasama Dalam Negeri", "Kerjasama Luar Negeri"),
-        horizontal=True
+st.subheader("1. Klasifikasi Kerjasama")
+# Gunakan key agar state tersimpan rapi
+jenis_kerjasama = st.radio(
+    "Pilih Jenis Kerjasama:",
+    ("Kerjasama Dalam Negeri", "Kerjasama Luar Negeri"),
+    horizontal=True,
+    key="jenis"
+)
+
+st.subheader("2. Mitra Kerjasama")
+# Logika ini HANYA jalan jika tidak dikurung dalam st.form
+opsi_mitra = mitra_dn if jenis_kerjasama == "Kerjasama Dalam Negeri" else mitra_ln
+mitra_dipilih = st.selectbox("Pilih Mitra:", opsi_mitra, key="mitra")
+
+col1, col2 = st.columns(2)
+with col1:
+    st.subheader("3. Bentuk")
+    bentuk = st.selectbox("Bentuk Kerjasama:", ["Kerjasama Utama", "Kerjasama Teknis"], key="bentuk")
+
+with col2:
+    st.subheader("4. Bidang")
+    bidang = st.selectbox(
+        "Bidang Kerjasama:",
+        ["Pendidikan dan Pengajaran", "Penelitian dan Publikasi", "Pengabdian Kepada Masyarakat"],
+        key="bidang"
     )
 
-    # --- Input 2: Mitra (Logic) ---
-    st.subheader("2. Mitra Kerjasama")
-    # Menentukan list mana yang dipakai berdasarkan pilihan No.1
-    opsi_mitra = mitra_dn if jenis_kerjasama == "Kerjasama Dalam Negeri" else mitra_ln
-    
-    mitra_dipilih = st.selectbox("Pilih Mitra:", opsi_mitra)
+st.subheader("5. Detail Kegiatan")
+if bidang == "Pendidikan dan Pengajaran":
+    opsi_kegiatan = kegiatan_pendidikan
+elif bidang == "Penelitian dan Publikasi":
+    opsi_kegiatan = kegiatan_penelitian
+else:
+    opsi_kegiatan = kegiatan_pengabdian
 
-    # --- Input 3: Bentuk Kerjasama ---
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("3. Bentuk")
-        bentuk = st.selectbox("Bentuk Kerjasama:", ["Kerjasama Utama", "Kerjasama Teknis"])
-    
-    # --- Input 4: Bidang Kerjasama ---
-    with col2:
-        st.subheader("4. Bidang")
-        bidang = st.selectbox(
-            "Bidang Kerjasama:",
-            ["Pendidikan dan Pengajaran", "Penelitian dan Publikasi", "Pengabdian Kepada Masyarakat"]
-        )
+kegiatan = st.selectbox("Pilih Jenis Kegiatan:", opsi_kegiatan, key="kegiatan")
 
-    # --- Input 5: Jenis Kegiatan (Logic) ---
-    st.subheader("5. Detail Kegiatan")
-    
-    # Menentukan list kegiatan berdasarkan pilihan No.4
-    if bidang == "Pendidikan dan Pengajaran":
-        opsi_kegiatan = kegiatan_pendidikan
-    elif bidang == "Penelitian dan Publikasi":
-        opsi_kegiatan = kegiatan_penelitian
-    else:
-        opsi_kegiatan = kegiatan_pengabdian
-        
-    kegiatan = st.selectbox("Pilih Jenis Kegiatan:", opsi_kegiatan)
-    
-    # Logic Tambahan: Munculkan Text Input jika pilih "Lainnya"
-    detail_lainnya = ""
-    if kegiatan == "Bidang lainnya (tuliskan)":
-        detail_lainnya = st.text_input("✍️ Tuliskan detail kegiatan lainnya:")
+detail_lainnya = ""
+if kegiatan == "Bidang lainnya (tuliskan)":
+    detail_lainnya = st.text_input("✍️ Tuliskan detail kegiatan lainnya:", key="lainnya")
 
-    # --- Input 6: Sumber Dana ---
-    st.subheader("6. Sumber Dana")
-    sumber_dana = st.selectbox(
-        "Pilih Sumber Dana:",
-        [
-            "Anggaran Perguruan Tinggi Swasta", "APBN", "APBD", 
-            "Anggaran Badan Layanan Umum", "Anggaran PT Berbadan Hukum",
-            "Anggaran Mitra Kerjasama", "Sumber-sumber lain yang disepakati"
-        ]
-    )
+st.subheader("6. Sumber Dana")
+sumber_dana = st.selectbox(
+    "Pilih Sumber Dana:",
+    [
+        "Anggaran Perguruan Tinggi Swasta", "APBN", "APBD", 
+        "Anggaran Badan Layanan Umum", "Anggaran PT Berbadan Hukum",
+        "Anggaran Mitra Kerjasama", "Sumber-sumber lain yang disepakati"
+    ],
+    key="dana"
+)
 
-    st.markdown("---")
-    submitted = st.form_submit_button("💾 Simpan Data Kerjasama", type="primary")
+st.markdown("---")
 
-# --- 4. TAMPILAN HASIL (OUTPUT) ---
-
-if submitted:
+# Tombol Simpan Manual (Karena st.form dihapus)
+if st.button("💾 Simpan Data Kerjasama", type="primary"):
     # Menggabungkan data jika user memilih 'Lainnya'
     kegiatan_final = detail_lainnya if kegiatan == "Bidang lainnya (tuliskan)" else kegiatan
     
     st.success("✅ Data berhasil disimpan!")
     
-    # Tampilan seperti kartu/tiket
+    # Tampilan hasil
     with st.container():
         st.write("### Ringkasan Input:")
         c1, c2 = st.columns(2)
